@@ -57,21 +57,25 @@ python M2SNet_train.py --dataset_dir <Your Dataset Dir>
 
 ```shell
 PYTHONPATH="$(dirname $0)/..":$PYTHONPATH \
-    python -u tools/train.py \
-    --name kit_baseline_dp_2gpu_8layers_1000 \
-    --batch_size 128 \
-    --times 50 \
-    --num_epochs 50 \
-    --dataset_name kit \
-    --num_layers 8 \
-    --diffusion_steps 1000 \
+python3 -u tools/train.py \
+    --name alice_version_9 \
+    --batch_size 32 \
+    --times 25 \
+    --num_epochs 400 \
+    --dataset_name ConductorMotion100 \
     --data_parallel \
-    --gpu_id 0 1
+    --gpu_id 1 2 > velocity_elbow.txt
 ```
 
-## Evaluation and Visualization
+## Inference and Visualization
 
-TODO
+```shell
+PYTHONPATH="$(dirname $0)/..":$PYTHONPATH \
+python -u tools/visualization.py \
+    --motion_length 6 \
+    --gpu_id 5 \
+    --result_path "test_sample_velocity_beethoven.mp4"
+```
 
 ## Acknowledgement
 This repo mainly uses code from [VirtualConductor](https://github.com/ChenDelong1999/VirtualConductor) and [MotionDiffuse](https://github.com/mingyuan-zhang/MotionDiffuse).
