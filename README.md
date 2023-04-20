@@ -36,8 +36,11 @@ PYTHONPATH="$(dirname $0)/..":$PYTHONPATH \
 ```
 
 ## Evaluation and Visualization
-
-TODO
+```
+PYTHONPATH="$(dirname $0)/..":$PYTHONPATH \
+python -u tools/eval_new.py\
+    --gpu_id 0 \
+```
 
 ## Acknowledgement
 This repo partially uses code from [VirtualConductor](https://github.com/ChenDelong1999/VirtualConductor) and [MotionDiffuse](https://github.com/mingyuan-zhang/MotionDiffuse).

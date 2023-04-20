@@ -1,7 +1,3 @@
-"""
-Copyright 2021 S-Lab
-"""
-
 from cv2 import norm
 import torch
 import torch.nn.functional as F
@@ -78,23 +74,10 @@ class StylizationBlock(nn.Module):
         emb: B, D
 
         """
-        # print('h.shape: ', h.shape)
-        # print('emb.shape: ', emb.shape)
-        # B, 1, 2D
-        # emb_out = self.emb_layers(emb).unsqueeze(1)
-
-        # print('emb_out1.shape: ', emb.shape)
-
         emb_out = self.emb_layers(emb)
-
-        # print('emb_out2.shape: ', emb.shape)
 
         # scale: B, 1, D / shift: B, 1, D
         scale, shift = torch.chunk(emb_out, 2, dim=2)
-
-        # print('self.norm.shape: ', self.norm(h).shape)
-        # print('1 + scale: ', (1+scale).shape)
-        # print('shift: ', shift.shape)
 
         h = self.norm(h) * (1 + scale) + shift
         h = self.out_layers(h)
@@ -119,50 +102,28 @@ class LinearTemporalSelfAttention(nn.Module):
         """
         B, T, D = x.shape
         
-        # print('!!B: ', B)
-        # print('!!T: ', T)
-        # print('!!D: ', D)
-        
         H = self.num_head
         # B, T, D
         query = self.query(self.norm(x))
         
-        # print('query: ', query.shape)
-        
         # B, T, D
         key = (self.key(self.norm(x)) + (1 - src_mask) * -1000000)
         
-        # print('key pre: ', key.shape)
-        
         query = F.softmax(query.view(B, T, H, -1), dim=-1)
         
-        # print('query: ', query.shape)
-        
         key = F.softmax(key.view(B, T, H, -1), dim=1)
-        
-        # print('key: ', key.shape)
         
         # B, T, H, HD
         value = (self.value(self.norm(x)) * src_mask).view(B, T, H, -1)
         
-        # print('value: ', value.shape)
-        
         # B, H, HD, HD
         attention = torch.einsum('bnhd,bnhl->bhdl', key, value)
         
-        # print('attention: ', attention.shape)
-        
         y = torch.einsum('bnhd,bhdl->bnhl', query, attention).reshape(B, T, D)
         
-        # print('y: ', y.shape)
-        
-
         y = x + self.proj_out(y, emb)
         
-        # print('y post: ', y.shape)
-        
         return y
-
 
 class LinearTemporalCrossAttention(nn.Module):
 
@@ -213,7 +174,6 @@ class FFN(nn.Module):
         y = self.linear2(self.dropout(self.activation(self.linear1(x))))
         y = x + self.proj_out(y, emb)
         return y
-    
 
 class LinearTemporalDiffusionTransformerDecoderLayer(nn.Module):
 
@@ -333,8 +293,6 @@ class TemporalDiffusionTransformerDecoderLayer(nn.Module):
         x = self.ffn(x, emb)
         return x
 
-
-
 class Conv2dResLayer(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride, padding, residual=True):
         super(Conv2dResLayer, self).__init__()
@@ -359,8 +317,6 @@ class Conv2dResLayer(nn.Module):
         res = self.residual(x)
         return out + res
 
-
-
 class MusicEncoder(nn.Module):
     def __init__(self,device):
         super(MusicEncoder, self).__init__()
@@ -377,23 +333,16 @@ class MusicEncoder(nn.Module):
                                    Conv2dResLayer(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
                                    nn.MaxPool2d(kernel_size=(3, 3), stride=(1, 2), padding=(1, 1)))
         self.conv4 = nn.Sequential(nn.Conv1d(32 * 16, 64, kernel_size=1, stride=1),nn.BatchNorm1d(64)) # change 64 to 1024
-        # self.conv4 = nn.Sequential(nn.Conv1d(32 * 16, 512, kernel_size=1, stride=1),nn.BatchNorm1d(512)) # change 64 to 1024
 
     def forward(self, x):    
-        # print('MusicEncoder ', x.shape)
         mel = x.unsqueeze(1)
         
         mel = mel.to(self.device)
-        # print(mel,self.device)
-        # print('check 1')
         h1 = self.conv1(mel)
         h2 = self.conv2(h1)
         h3 = self.conv3(h2)
-        # print('check 2')
         h3 = h3.transpose(1, 2).flatten(start_dim=2).transpose(1, 2)
         h4 = self.conv4(h3).transpose(1, 2)
-
-        # print('h4 shape: ', h4.shape)
 
         return h4 # so the latent dim is 64
 
@@ -426,13 +375,8 @@ class MotionTransformer(nn.Module):
                  dropout=0,
                  activation="gelu", 
                  device = 'cuda',
-                #  num_text_layers=4,
-                #  text_latent_dim=256,
-                #  text_ff_size=2048,
                  text_num_heads=4,
                  music_model_path='/Users/jinbin/5340Proj/stage_1_checkpoints/M2SNet/hard/M2SNet_395_208296.pt',
-                #  music_model_path=None,
-                #  no_clip=False,
                  no_eff=False,
                  **kargs):
         super().__init__()
@@ -449,25 +393,12 @@ class MotionTransformer(nn.Module):
         self.sequence_embedding = nn.Parameter(torch.randn(num_frames, latent_dim))
         self.device = device
         
-        self.cond_mask_prob = 0.1
-        # Music Transformer
-
-        # print('music_model_path: ', music_model_path)
-
-        # music_model_path = None
+        self.cond_mask_prob = 0.1 # unconditional rate
         
         self.music_encoder = MusicEncoder(device=device)
         # assert music_model_path is not None
         if music_model_path is not None:
             base_weights = torch.load(music_model_path)
-
-            # # pop last layer of pretrained music encoders
-            # base_weights.pop('module.music_encoder.conv4.0.weight')
-            # base_weights.pop('module.music_encoder.conv4.0.bias')
-            # base_weights.pop('module.music_encoder.conv4.1.weight')
-            # base_weights.pop('module.music_encoder.conv4.1.bias')
-            # base_weights.pop('module.music_encoder.conv4.1.running_mean')
-            # base_weights.pop('module.music_encoder.conv4.1.running_var')
 
             new_weights = {}
             for key in list(base_weights.keys()):
@@ -478,33 +409,8 @@ class MotionTransformer(nn.Module):
         self.music_encoder.eval()
         
         self.linear= nn.Linear(64,512)
-        # self.music_encoder.to(device)
 
         music_latent_dim = 512 # change 64 into 512
-
-        # Text Transformer
-        # self.clip, _ = clip.load('ViT-B/32', "cpu")
-        # if no_clip:
-        #     self.clip.initialize_parameters()
-        # else:
-        #     set_requires_grad(self.clip, False)
-        # if text_latent_dim != 512:
-        #     self.text_pre_proj = nn.Linear(512, text_latent_dim)
-        # else:
-        #     self.text_pre_proj = nn.Identity()
-        # textTransEncoderLayer = nn.TransformerEncoderLayer(
-        #     d_model=text_latent_dim,
-        #     nhead=text_num_heads,
-        #     dim_feedforward=text_ff_size,
-        #     dropout=dropout,
-        #     activation=activation)
-        # self.textTransEncoder = nn.TransformerEncoder(
-        #     textTransEncoderLayer,
-        #     num_layers=num_text_layers)
-        # self.text_ln = nn.LayerNorm(text_latent_dim)
-        # self.text_proj = nn.Sequential(
-        #     nn.Linear(text_latent_dim, self.time_embed_dim)
-        # )
 
         # Input Embedding
         self.joint_embed = nn.Linear(self.input_feats, self.latent_dim)
@@ -560,27 +466,7 @@ class MotionTransformer(nn.Module):
             
         x_proj = self.proj(x)
             
-        # return x, x # [B,T,D]
         return x_proj, x # [B,T,D]
-     
-    # def encode_text(self, text, device):
-    #     with torch.no_grad():
-    #         text = clip.tokenize(text, truncate=True).to(device)
-    #         x = self.clip.token_embedding(text).type(self.clip.dtype)  # [batch_size, n_ctx, d_model]
-
-    #         x = x + self.clip.positional_embedding.type(self.clip.dtype)
-    #         x = x.permute(1, 0, 2)  # NLD -> LND
-    #         x = self.clip.transformer(x)
-    #         x = self.clip.ln_final(x).type(self.clip.dtype)
-
-    #     # T, B, D
-    #     x = self.text_pre_proj(x)
-    #     xf_out = self.textTransEncoder(x)
-    #     xf_out = self.text_ln(xf_out)
-    #     xf_proj = self.text_proj(xf_out[text.argmax(dim=-1), torch.arange(xf_out.shape[1])])
-    #     # B, T, D
-    #     xf_out = xf_out.permute(1, 0, 2)
-    #     return xf_proj, xf_out
 
     def generate_src_mask(self, T, length):
         B = len(length)
@@ -599,38 +485,22 @@ class MotionTransformer(nn.Module):
             index = x.device.index
             text = text[index * B: index * B + B]
         if xf_proj is None or xf_out is None:
-            # xf_proj, xf_out = self.encode_text(text, x.device)
             xf_proj, xf_out = self.encode_music(text, x.device)
         xf_proj = self.linear(xf_proj)
         xf_out = self.linear(xf_out)
 
-        # print('x shape:', x.shape)
-
-        # print('xf_proj.shape: ', xf_proj.shape) #[bs,1800,64]
-        # print('timesteps.shape: ', timesteps.shape)#[bs]
-
-        # print('timesteps: ', timesteps)#[bs]
-
-        # print('self.latent_dim: ', self.latent_dim)#[latent_dim]
-        # print('timestep_embedding: ', timestep_embedding(timesteps, self.latent_dim).shape)#[bs,latent_dim]
-        # print('time_embed timestep_embedding: ', self.time_embed(timestep_embedding(timesteps, self.latent_dim)).shape) #[bs,latent_dim*4]
         emb = self.time_embed(timestep_embedding(timesteps, self.latent_dim)).unsqueeze(1) + xf_proj
 
-        # print('emb.shape: ', emb.shape) #[bs,1800,latent_dim*4]
-        # print('x.shape: ', x.shape) #([32, 1800, 13, 2])
         if len(x.shape)==4:
             x=torch.flatten(x, start_dim=2, end_dim=3)
+
         # B, T, latent_dim
-        h = self.joint_embed(x) # joint_embed is linear with [motion_dim 26, latent_dim 16]
-        
-        # print('h shape: ', h.shape)
+        h = self.joint_embed(x)
         
         h = h + self.sequence_embedding.unsqueeze(0)[:, :T, :]
 
         src_mask = self.generate_src_mask(T, length).to(x.device).unsqueeze(-1)
         for module in self.temporal_decoder_blocks:
-            # print('h.shape,xf_out.shape,emb.shape,src_mask.shape: ', h.shape,xf_out.shape,emb.shape,src_mask.shape) 
-            #torch.Size([32, 1800, 16]) torch.Size([32, 1800, 64]) torch.Size([32, 1800, 64]) torch.Size([32, 1800, 1])
             h = module(h, xf_out, emb, src_mask)
 
         output = self.out(h).view(B, T, -1).contiguous()

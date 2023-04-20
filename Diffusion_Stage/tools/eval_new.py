@@ -20,9 +20,6 @@ import argparse
 
 from utils.get_opt import get_opt
 
-# torch.cuda.set_device(6)
-# os.environ['CUDA_VISIBLE_DEVICES'] ='6, 7'
-
 torch.cuda.set_device(1)
 os.environ['CUDA_VISIBLE_DEVICES'] ='1, 2, 3'
 
@@ -50,9 +47,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--opt_path', type=str, default="/Users/jinbin/5340Proj/alice_dir/my_MotionDiffuse/ssh_MotionDiffuse/text2motion/checkpoints/ConductorMotion100/alice_version_9/opt.txt", help='Opt path')
     parser.add_argument('--gpu_id', type=int, default=5, help="which gpu to use")
-  
-    # parser = TrainCompOptions()
-    # opt = parser.parse()
     
     args = parser.parse_args()
     
@@ -61,9 +55,6 @@ if __name__ == '__main__':
     opt = get_opt(args.opt_path, device)
     
     rank, world_size = get_dist_info()
-
-    # opt.device = torch.device("cuda")
-    # torch.autograd.set_detect_anomaly(True)
 
     opt.do_denoise = True
     opt.save_root = pjoin(opt.checkpoints_dir, opt.dataset_name, opt.name)
@@ -78,15 +69,10 @@ if __name__ == '__main__':
 
     if opt.dataset_name == 'ConductorMotion100':
         opt.data_root = '/Users/jinbin/5340Proj/dataset/'
-        # opt.motion_dir = ''#pjoin(opt.data_root, 'new_joint_vecs')
-        # opt.text_dir = ''#pjoin(opt.data_root, 'texts')
+        
         opt.joints_num = 13
         dim_pose = 26 #[1800, 13, 2]
-        # radius = 4
-        #dim_mel [5400, 128]
         opt.max_motion_length = 1800
-        # sample_length = 60 # means 60s
-        # sample_length = 6 # means 60s
         sample_length = 30 # means 60s
         
         split = 'test'
@@ -108,17 +94,6 @@ if __name__ == '__main__':
         raise KeyError('Dataset Does Not Exist')
 
     encoder = build_models(opt, dim_pose).to(device)
-    # if world_size > 1:
-    #     encoder = MMDistributedDataParallel(
-    #         encoder.cuda(),
-    #         device_ids=[torch.cuda.current_device()],
-    #         broadcast_buffers=False,
-    #         find_unused_parameters=True)
-    # elif opt.data_parallel:
-    #     encoder = MMDataParallel(
-    #         encoder.cuda(opt.gpu_id[0]), device_ids=opt.gpu_id)
-    # else:
-    #     encoder = encoder.cuda()
     
     opt.dim_pose = 26
 

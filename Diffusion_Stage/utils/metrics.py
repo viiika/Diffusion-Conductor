@@ -2,7 +2,6 @@ import numpy as np
 from scipy import linalg
 
 
-# (X - X_train)*(X - X_train) = -2X*X_train + X*X + X_train*X_train
 def euclidean_distance_matrix(matrix1, matrix2):
     """
         Params:

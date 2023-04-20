@@ -105,12 +105,6 @@ def vis_img(img, kp_preds, kp_scores, hand_trace):
             else:
                 cv2.line(img, start_xy, end_xy, (128, 128, 128), 1)
 
-    '''for n in [1,2]:
-        cor_x, cor_y = int(kp_preds[n, 0]), int(kp_preds[n, 1])
-        cv2.circle(img, (int(cor_x), int(cor_y)), 9, white, 9)
-        cv2.circle(img, (int(cor_x), int(cor_y)), 2, black, 2)
-        cv2.circle(img, (int(cor_x), int(cor_y)), 10, black, 2)'''
-
     for n in [9, 10]:
         cor_x, cor_y = int(kp_preds[n, 0]), int(kp_preds[n, 1])
         cv2.circle(img, (int(cor_x), int(cor_y)), 9, white, 9)
@@ -122,29 +116,9 @@ def vis_img(img, kp_preds, kp_scores, hand_trace):
 
 
 def vis_motion(motions, kp_score=None, save_path='../test/result', name='_[name]_', post_processing=True):
-
-    def normalize(motion):
-        # input: motion (13,2)
-        # output: motion (13,2)
-        
-        # get the center of the motion
-        center = np.mean(motion, axis=0)
-        # get the max distance from the center
-        max_dist = np.max(np.linalg.norm(motion - center, axis=1))
-        # normalize the motion
-        motion = (motion - center) / max_dist + 0.5
-        return motion
-        
     motions = np.array(motions)
     motions = motions.reshape([motions.shape[0],motions.shape[1],13,2])
 
-    # for i in range(motions.shape[0]):
-    #     motions[i] = normalize(motions[i])
-
-    print(motions.shape)
-    print(motions[0,0,:])
-    print(motions[0,100, :])
-    # print(np.shape(motions))#.shape)
     # motions [num_conductor, num_frame, 13, 2]
     if kp_score is None:  # confidence
         kp_score = np.zeros((motions[0].shape[0], 17))
@@ -172,25 +146,11 @@ def vis_motion(motions, kp_score=None, save_path='../test/result', name='_[name]
             background = np.ones((window, window, 3), np.uint8) * 255
             img = vis_img(background, motion[f], kp_score[f], hand_traces[i][f:f + trace_len, :, :])
             frame = np.concatenate((frame, img), axis=1)
-        # cv2.imshow("frame", frame)
-        # save img
-        # if f % 30 == 0:
-        #    cv2.imwrite(save_path + '{}.png'.format(str(np.random.rand())), frame)
-        # key = cv2.waitKey(1)
-        # if key == 27:  # press Esc
-        #    break
+
         wirter.write(frame)
     wirter.release()
     cv2.destroyAllWindows()
     return video_file
-
-
-# def plot_t2m(data, result_path, npy_path, caption):
-#     joint = recover_from_ric(torch.from_numpy(data).float(), opt.joints_num).numpy()
-#     joint = motion_temporal_filter(joint, sigma=1)
-#     plot_3d_motion(result_path, paramUtil.t2m_kinematic_chain, joint, title=caption, fps=20)
-#     if npy_path != "":
-#         np.save(npy_path, joint)
 
 def plot_music2motion(data, result_path, npy_path, title):
     saved_video_file = vis_motion([data], save_path=result_path, name=title)
@@ -208,19 +168,11 @@ def extract_mel_feature(audio_file, mel_len_90fps=None):
     if len(y) > sr * 60:
         y = y[:sr * 60]
 
-    # if len(y) > sr * 30:
-    #     y = y[:sr * 30]
-
     if mel_len_90fps is None:
         mel_len_90fps = int(len(y) / sr * 90)
+
     mel = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128, hop_length=256)
     mel_dB = librosa.power_to_db(mel, ref=np.max)
-
-    # fig, ax = plt.subplots()
-    # img = librosa.display.specshow(mel_dB, x_axis='time', y_axis='mel', sr=sr, ax=ax)
-    # fig.colorbar(img, ax=ax, format='%+2.0f dB')
-    # ax.set(title='Mel-frequency spectrogram')
-    # plt.show()
 
     norm_mel = np.flip(np.abs(mel_dB + 80) / 80, 0)
     resized_mel = cv2.resize(norm_mel, (mel_len_90fps, norm_mel.shape[0]))
@@ -240,7 +192,6 @@ def build_models(opt):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--opt_path', type=str, default="/Users/jinbin/5340Proj/alice_dir/my_MotionDiffuse/ssh_MotionDiffuse/text2motion/checkpoints/ConductorMotion100/alice_version_9/opt.txt", help='Opt path')
-    # parser.add_argument('--text', type=str, default="", help='Text description for motion generation')
     parser.add_argument('--music_path', type=str, default="/Users/jinbin/5340Proj/VirtualConductor/test/test_samples/Beethoven Symphony 7.mp3", help='Music Path for motion generation')
     parser.add_argument('--motion_length', type=int, default=60, help='Number of frames for motion generation')
     parser.add_argument('--result_path', type=str, default="test_sample.gif", help='Path to save generation result')
@@ -253,28 +204,15 @@ if __name__ == '__main__':
     opt = get_opt(args.opt_path, device)
     opt.do_denoise = True
 
-    # assert opt.dataset_name == "t2m"
     assert args.motion_length <= 196
-    # opt.data_root = './dataset/HumanML3D'
-    # opt.motion_dir = pjoin(opt.data_root, 'new_joint_vecs')
-    # opt.text_dir = pjoin(opt.data_root, 'texts')
-    opt.joints_num = 13#22
-    opt.dim_pose = 26#263
-    # dim_word = 300
-    # dim_pos_ohot = len(POS_enumerator)
-    # num_classes = 200 // opt.unit_length
 
-    # mean = np.load(pjoin(opt.meta_dir, 'mean.npy'))
-    # std = np.load(pjoin(opt.meta_dir, 'std.npy'))
+    opt.joints_num = 13
+    opt.dim_pose = 26
 
     encoder = build_models(opt).to(device)
     trainer = DDPMTrainer(opt, encoder)
-    # trainer.load(pjoin(opt.model_dir, opt.which_epoch + '.tar'))
 
-    print('path: ', pjoin(opt.model_dir, 'latest.tar'))
     trainer.load(pjoin(opt.model_dir, 'latest.tar'))  
-    # print('path: ', pjoin(opt.model_dir, 'ckpt_e020.tar'))
-    # trainer.load(pjoin(opt.model_dir, 'ckpt_e020.tar'))
 
     trainer.eval_mode()
     trainer.to(opt.device)
@@ -283,54 +221,14 @@ if __name__ == '__main__':
 
     with torch.no_grad():
         if args.motion_length != -1:
-            #caption = [args.text]
             music_path = args.music_path
-            # test_dataset = Music2MotionDataset(opt, 60, '', None, music_dir)
-            #extract music feature
-
             mel = extract_mel_feature(music_path)
-            # if mel.shape[0]>5400:
-            #     mel = mel[:5400,]
-            # print('mel shape, ',mel.shape) #[5400,128]
-
-            # m_lens = torch.LongTensor([args.motion_length]).to(device)
-            
-            # print('mel shape: ', mel.shape) # (540, 128)
             
             pred_motions = trainer.generate_music_motion(mel, opt.dim_pose)
 
-            # pred_motions = trainer.generate(caption, m_lens, opt.dim_pose)
             motion = pred_motions[0].cpu().numpy()
-            
-            # print('motion shape: ', motion.shape)
-            
+                        
             # motion = motion * std + mean
-            title = " #%d" % motion.shape[0] + 'alice' #args.text + " #%d" % motion.shape[0]
-            #plot_t2m(motion, args.result_path, args.npy_path, title)
+            title = " #%d" % motion.shape[0] + 'alice'
+            
             plot_music2motion(motion, args.result_path, args.npy_path, title)
-    # print('hello')
-    # with torch.no_grad():
-    #     if args.motion_length != -1:
-    #         # #caption = [args.text]
-    #         # music_path = args.music_path
-    #         # # test_dataset = Music2MotionDataset(opt, 60, '', None, music_dir)
-    #         # #extract music feature
-
-    #         # mel = extract_mel_feature(music_path)
-    #         # # if mel.shape[0]>5400:
-    #         # #     mel = mel[:5400,]
-    #         # # print('mel shape, ',mel.shape) #[5400,128]
-
-    #         # # m_lens = torch.LongTensor([args.motion_length]).to(device)
-    #         # pred_motions = trainer.generate_music_motion(mel, opt.dim_pose)
-
-    #         # # pred_motions = trainer.generate(caption, m_lens, opt.dim_pose)
-    #         # motion = pred_motions[0].cpu().numpy()
-    #         # # motion = motion * std + mean
-    #         motion = np.load('/Users/jinbin/5340Proj/dataset/train/0/motion.npy')
-    #         # print(motion.shape)
-    #         motion = motion.unsqueeze(0)
-
-    #         title = " #%d" % motion.shape[0] #args.text + " #%d" % motion.shape[0]
-    #         #plot_t2m(motion, args.result_path, args.npy_path, title)
-    #         plot_music2motion(motion, args.result_path, args.npy_path, title)

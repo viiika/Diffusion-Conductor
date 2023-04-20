@@ -14,9 +14,6 @@ from mmcv.parallel import MMDistributedDataParallel, MMDataParallel
 import torch
 import torch.distributed as dist
 
-# torch.cuda.set_device(6)
-# os.environ['CUDA_VISIBLE_DEVICES'] ='6, 7'
-
 torch.cuda.set_device(1)
 os.environ['CUDA_VISIBLE_DEVICES'] ='1, 2'
 
@@ -52,32 +49,15 @@ if __name__ == '__main__':
 
     if opt.dataset_name == 'ConductorMotion100':
         opt.data_root = '/Users/jinbin/5340Proj/dataset/'
-        # opt.motion_dir = ''#pjoin(opt.data_root, 'new_joint_vecs')
-        # opt.text_dir = ''#pjoin(opt.data_root, 'texts')
         opt.joints_num = 13
         dim_pose = 26 #[1800, 13, 2]
-        # radius = 4
-        #dim_mel [5400, 128]
         opt.max_motion_length = 1800
-        # sample_length = 60 # means 60s
-        # sample_length = 6 # means 60s
         sample_length = 30 # means 60s
         
         split = 'train'
         limit = None
         root_dir = '/Users/jinbin/5340Proj/dataset/'
-
-
-    # elif opt.dataset_name == 't2m':
-    #     opt.data_root = './data/HumanML3D'
-    #     opt.motion_dir = pjoin(opt.data_root, 'new_joint_vecs')
-    #     opt.text_dir = pjoin(opt.data_root, 'texts')
-    #     opt.joints_num = 22
-    #     radius = 4
-    #     fps = 20
-    #     opt.max_motion_length = 196
-    #     dim_pose = 263
-    #     kinematic_chain = paramUtil.t2m_kinematic_chain
+        
     elif opt.dataset_name == 'kit':
         opt.data_root = './data/KIT-ML'
         opt.motion_dir = pjoin(opt.data_root, 'new_joint_vecs')
@@ -91,12 +71,6 @@ if __name__ == '__main__':
 
     else:
         raise KeyError('Dataset Does Not Exist')
-
-    # dim_word = 300
-    # mean = np.load(pjoin(opt.data_root, 'Mean.npy'))
-    # std = np.load(pjoin(opt.data_root, 'Std.npy'))
-
-    # train_split_file = pjoin(opt.data_root, 'train')
 
     encoder = build_models(opt, dim_pose)
     if world_size > 1:
@@ -112,8 +86,6 @@ if __name__ == '__main__':
         encoder = encoder.cuda()
 
     trainer = DDPMTrainer(opt, encoder)
-    # if opt.dataset_name == 'ConductorMotion100':
     train_dataset = Music2MotionDataset(opt, sample_length, split, limit, root_dir)
-    # else:
-    #     train_dataset = Text2MotionDataset(opt, mean, std, train_split_file, opt.times)
+    
     trainer.train(train_dataset)
