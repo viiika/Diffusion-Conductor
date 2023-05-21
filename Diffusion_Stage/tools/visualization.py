@@ -179,7 +179,7 @@ def build_models(opt):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--opt_path', type=str, default="/home/zhuoran/code/Diffusion_Stage/checkpoints/ConductorMotion100/add_velocity_pretrain_elbow_clamp_lambda/opt.txt", help='Opt path')
+    parser.add_argument('--opt_path', type=str, default="/home/zhuoran/code/Diffusion_Stage/checkpoints/ConductorMotion100/train/opt.txt", help='Opt path')
     parser.add_argument('--music_path', type=str, default="/home/zhuoran/code/music/Beethoven Symphony 7.mp3", help='Music Path for motion generation')
     parser.add_argument('--motion_length', type=int, default=60, help='Number of frames for motion generation')
     parser.add_argument('--result_path', type=str, default="test_sample.gif", help='Path to save generation result')
@@ -217,6 +217,6 @@ if __name__ == '__main__':
             motion = motion.reshape([motion.shape[0],13,2])
 
             # motion = motion * std + mean
-            title = " #%d" % motion.shape[0] + 'alice'
+            title = " #%d" % motion.shape[0]
             
             plot_music2motion(motion, args.result_path, args.npy_path, title)
