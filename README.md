@@ -1,4 +1,8 @@
-# Taming Diffusion Models for Music-Conditioned Conductor Motion Generation
+# Taming Diffusion Models for Music-driven Conducting Motion Generation
+
+## Overview of the proposed framework
+
+![](./assets/images/architecture.jpg)
 
 ## Installation
 
@@ -50,12 +54,16 @@ Each `mel.npy` and `motion.npy` are corresponded to <u>60 seconds</u> of Mel spe
 ### Train the music encoder in Contrastive_Stage with the following command:
 
 ```shell 
+cd Contrastive_Stage
+
 python M2SNet_train.py --dataset_dir <Your Dataset Dir> 
 ```
 
 ### Train the diffusion model in Diffusion_Stage with the following command:
 
 ```shell
+cd Diffusion_Stage
+
 PYTHONPATH="$(dirname $0)/..":$PYTHONPATH \
 python3 -u tools/train.py \
     --name checkpoint_folder_name \
@@ -70,6 +78,8 @@ python3 -u tools/train.py \
 ## Inference and Visualization
 
 ```shell
+cd Diffusion_Stage
+
 PYTHONPATH="$(dirname $0)/..":$PYTHONPATH \
 python -u tools/visualization.py \
     --motion_length 6 \
@@ -124,11 +134,11 @@ This repo mainly uses code from [VirtualConductor](https://github.com/ChenDelong
 
 3. Zhang, Mingyuan and Cai, Zhongang and Pan, Liang and Hong, Fangzhou and Guo, Xinying and Yang, Lei and Liu, Ziwei. [Motiondiffuse: Text-driven human motion generation with diffusion model](https://arxiv.org/abs/2208.15001)
 
-```bibtex
-@article{zhang2022motiondiffuse,
-  title={Motiondiffuse: Text-driven human motion generation with diffusion model},
-  author={Zhang, Mingyuan and Cai, Zhongang and Pan, Liang and Hong, Fangzhou and Guo, Xinying and Yang, Lei and Liu, Ziwei},
-  journal={arXiv preprint arXiv:2208.15001},
-  year={2022}
-}
-```
+    ```bibtex
+    @article{zhang2022motiondiffuse,
+      title={Motiondiffuse: Text-driven human motion generation with diffusion model},
+      author={Zhang, Mingyuan and Cai, Zhongang and Pan, Liang and Hong, Fangzhou and Guo, Xinying and Yang, Lei and Liu, Ziwei},
+      journal={arXiv preprint arXiv:2208.15001},
+      year={2022}
+    }
+    ```
