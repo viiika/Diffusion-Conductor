@@ -141,17 +141,8 @@ class M2SGAN_Evaluator():
             frechet_distance_all.append(frechet_dist)
             feat_dist_all.append(feat_dist)
             
-            print('frechet_dist: ', frechet_dist)
-            print('feat_dist: ', feat_dist)
-            # print('frechet_distance_all: ', frechet_distance_all)
-            print('Frechet_distance: %.5f' % (np.mean(frechet_distance_all)))
-            print('Feat distance: %.5f' % (np.mean(feat_dist_all)))
-            
             real_beat_score = self.calculate_beat_scores(real_motion[0].cpu().data.numpy(), mel[0].cpu().data.numpy())
             generated_beat_score = self.calculate_beat_scores(fake_motion[0].cpu().data.numpy(), mel[0].cpu().data.numpy())
-            
-            print('real_beat_score: ', real_beat_score)
-            print('generated_beat_score: ', generated_beat_score)
             
             real_beat_scores.append(real_beat_score)
             generated_beat_scores.append(generated_beat_score)
@@ -453,27 +444,6 @@ if __name__ == '__main__':
     motion_features = Motion_features(M2SNet.motion_encoder) # extract latent motion feature
     
     evaluator = M2SGAN_Evaluator(args)
-    
-    # exps = os.listdir('checkpoints/M2SGAN/Ablation')
-    # for exp in exps:
-    #     if exp == 'CNN-LSTM':
-    #         continue
-    #     writer = SummaryWriter(comment='_post_eval_' + exp)
-    #     G_ckpts = os.listdir('checkpoints/M2SGAN/Ablation/{}/Generator'.format(exp))
-    #     G_ckpts.sort(key=lambda x: int(x.split('_')[-2]))
-    #     D_ckpts = os.listdir('checkpoints/M2SGAN/Ablation/{}/Discriminator'.format(exp))
-    #     D_ckpts.sort(key=lambda x: int(x.split('_')[-2]))
-    #     print(exp, G_ckpts)
-    #     for i in range(len(G_ckpts)):
-    #         if i > len(G_ckpts) - 10:
-    #             epoch = int(G_ckpts[i].split('_')[-2])
-    #             global_step = int(G_ckpts[i].split('_')[-1].split('.')[0])
-    #             G = Generator().to(device)
-    #             G.load_state_dict(torch.load('checkpoints/M2SGAN/{}/Generator/{}'.format(exp, G_ckpts[i])))
-    #             D = Discriminator_1DCNN().to(device)
-    #             D.load_state_dict(torch.load('checkpoints/M2SGAN/{}/Discriminator/{}'.format(exp, D_ckpts[i])))
-
-    #             evaluator.evaluate(G, D, perceptual_loss, writer, epoch, global_step, save_checkpoints=False)
     
     writer = SummaryWriter(comment='_post_eval_')
     
