@@ -2,3 +2,4 @@
 .DS_Store
 **/checkpoints
 **/stage_one_checkpoints
+**/*.txt
