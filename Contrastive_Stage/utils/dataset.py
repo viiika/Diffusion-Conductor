@@ -6,7 +6,7 @@ from torch.utils.data import Dataset
 
 
 class ConductorMotionDataset(Dataset):
-    def __init__(self, sample_length, split, limit=None, root_dir='Dataset'):
+    def __init__(self, sample_length, split, limit=None, root_dir='/mnt/data/zhuoran/'):
 
         self.dataset_dir = os.path.join(root_dir, split)
         self.sample_length = sample_length

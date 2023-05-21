@@ -58,13 +58,13 @@ python M2SNet_train.py --dataset_dir <Your Dataset Dir>
 ```shell
 PYTHONPATH="$(dirname $0)/..":$PYTHONPATH \
 python3 -u tools/train.py \
-    --name alice_version_9 \
+    --name checkpoint_folder_name \
     --batch_size 32 \
     --times 25 \
     --num_epochs 400 \
     --dataset_name ConductorMotion100 \
     --data_parallel \
-    --gpu_id 1 2 > velocity_elbow.txt
+    --gpu_id 1 2
 ```
 
 ## Inference and Visualization
@@ -74,7 +74,7 @@ PYTHONPATH="$(dirname $0)/..":$PYTHONPATH \
 python -u tools/visualization.py \
     --motion_length 6 \
     --gpu_id 5 \
-    --result_path "test_sample_velocity_beethoven.mp4"
+    --result_path "test_sample.mp4"
 ```
 
 ## Acknowledgement

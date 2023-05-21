@@ -45,6 +45,22 @@ class SyncLoss(nn.Module):
 
         return loss_all
 
+class Motion_features(nn.Module):
+    def __init__(self, motion_encoder):
+        super(Motion_features, self).__init__()
+        self.motion_encoder = motion_encoder.eval()
+        self.criterion = nn.L1Loss()
+
+    def forward(self, fake_motion, motion):
+        real_feature = self.motion_encoder.features(motion)
+        fake_feature = self.motion_encoder.features(fake_motion)
+        '''loss_all = 0
+        for i in range(len(self.weights)):
+            fake = torch.max_pool1d(fake_feature[i], kernel_size=5, stride=3)
+            real = torch.max_pool1d(real_feature[i], kernel_size=5, stride=3)
+            loss_all += self.criterion(fake, real)'''
+
+        return real_feature[-1], fake_feature[-1]
 
 def calc_gradient_penalty_ST(D, real_data, fake_data, term=None):
     if term is None:

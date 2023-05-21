@@ -119,7 +119,6 @@ class LossAwareSampler(ScheduleSampler):
         :param losses: a list of float losses, one per timestep.
         """
 
-
 class LossSecondMomentResampler(LossAwareSampler):
     def __init__(self, diffusion, history_per_term=10, uniform_prob=0.001):
         self.diffusion = diffusion
@@ -1085,12 +1084,20 @@ class GaussianDiffusion:
             # body_joints_idx = [5,6,11,12]
             body_joints_idx = [10,11,12,13,22,23,24,25]
             # elbow_joints_idx = [7,8]
-            # elbow_joints_idx = [14,15,16,17,18,19,20,21]
-            elbow_joints_idx = [18,19,20,21]
+            elbow_joints_idx = [14,15,16,17,18,19,20,21]
+            # elbow_joints_idx = [18,19,20,21]
 
             terms["mse"] = mean_flat((target - model_output) ** 2).view(-1, 1).mean(-1)
             terms["velocity_body"] = mean_flat((model_output[:,1:,body_joints_idx] - model_output[:,:-1,body_joints_idx]) ** 2).view(-1).mean(-1)
             terms["velocity_elbow"] = mean_flat((model_output[:,1:,elbow_joints_idx] - model_output[:,:-1,elbow_joints_idx]) ** 2).view(-1).mean(-1)
+            
+            velocity_target = target[:,1:] - target[:,:-1]
+            velocity_pred = model_output[:,1:] - model_output[:,:-1]
+            
+            # print('velocity_target: ', velocity_target)
+            # print('velocity_pred: ', velocity_pred)
+
+            terms["velocity"] = mean_flat(((target[:,1:] - target[:,:-1]) - (model_output[:,1:] - model_output[:,:-1])) ** 2).view(-1).mean(-1)
             
             # if "vb" in terms:
             #     terms["loss"] = terms["mse"] + terms["vb"]

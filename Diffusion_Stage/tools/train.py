@@ -7,7 +7,7 @@ from utils.plot_script import *
 
 from models import MotionTransformer
 from trainers import DDPMTrainer
-from datasets import Text2MotionDataset, Music2MotionDataset
+from datasets import Music2MotionDataset
 
 from mmcv.runner import get_dist_info, init_dist
 from mmcv.parallel import MMDistributedDataParallel, MMDataParallel
@@ -48,7 +48,7 @@ if __name__ == '__main__':
         dist.barrier()
 
     if opt.dataset_name == 'ConductorMotion100':
-        opt.data_root = '/Users/jinbin/5340Proj/dataset/'
+        opt.data_root = '/mnt/data/zhuoran/'
         opt.joints_num = 13
         dim_pose = 26 #[1800, 13, 2]
         opt.max_motion_length = 1800
@@ -56,7 +56,7 @@ if __name__ == '__main__':
         
         split = 'train'
         limit = None
-        root_dir = '/Users/jinbin/5340Proj/dataset/'
+        root_dir = '/mnt/data/zhuoran/'
         
     elif opt.dataset_name == 'kit':
         opt.data_root = './data/KIT-ML'

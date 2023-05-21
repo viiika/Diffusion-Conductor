@@ -2,9 +2,6 @@ from cv2 import norm
 import torch
 import torch.nn.functional as F
 from torch import layer_norm, nn
-import numpy as np
-import clip
-
 import math
 
 
@@ -193,11 +190,8 @@ class LinearTemporalDiffusionTransformerDecoderLayer(nn.Module):
         self.ffn = FFN(latent_dim, ffn_dim, dropout, time_embed_dim)
 
     def forward(self, x, xf, emb, src_mask):
-        # print('1. emb.shape: ',emb.shape)
         x = self.sa_block(x, emb, src_mask)
-        # print('2. emb.shape: ',emb.shape)
         x = self.ca_block(x, xf, emb)
-        # print('3. emb.shape: ',emb.shape)
         x = self.ffn(x, emb)
         return x
 
@@ -287,7 +281,6 @@ class TemporalDiffusionTransformerDecoderLayer(nn.Module):
         self.ffn = FFN(latent_dim, ffn_dim, dropout, time_embed_dim)
 
     def forward(self, x, xf, emb, src_mask):
-        # print('TemporalDiffusionTransformerDecoderLayer.emb ', emb.shape)
         x = self.sa_block(x, emb, src_mask)
         x = self.ca_block(x, xf, emb)
         x = self.ffn(x, emb)
@@ -332,7 +325,7 @@ class MusicEncoder(nn.Module):
         self.conv3 = nn.Sequential(Conv2dResLayer(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
                                    Conv2dResLayer(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1)),
                                    nn.MaxPool2d(kernel_size=(3, 3), stride=(1, 2), padding=(1, 1)))
-        self.conv4 = nn.Sequential(nn.Conv1d(32 * 16, 64, kernel_size=1, stride=1),nn.BatchNorm1d(64)) # change 64 to 1024
+        self.conv4 = nn.Sequential(nn.Conv1d(32 * 16, 64, kernel_size=1, stride=1),nn.BatchNorm1d(64))
 
     def forward(self, x):    
         mel = x.unsqueeze(1)
@@ -344,7 +337,7 @@ class MusicEncoder(nn.Module):
         h3 = h3.transpose(1, 2).flatten(start_dim=2).transpose(1, 2)
         h4 = self.conv4(h3).transpose(1, 2)
 
-        return h4 # so the latent dim is 64
+        return h4
 
     def features(self, x):
         mel = x.unsqueeze(1)
@@ -376,7 +369,7 @@ class MotionTransformer(nn.Module):
                  activation="gelu", 
                  device = 'cuda',
                  text_num_heads=4,
-                 music_model_path='/Users/jinbin/5340Proj/stage_1_checkpoints/M2SNet/hard/M2SNet_395_208296.pt',
+                 music_model_path='/home/zhuoran/code/Diffusion_Stage/stage_one_checkpoints/M2SNet_395_208296.pt',
                  no_eff=False,
                  **kargs):
         super().__init__()
@@ -396,6 +389,7 @@ class MotionTransformer(nn.Module):
         self.cond_mask_prob = 0.1 # unconditional rate
         
         self.music_encoder = MusicEncoder(device=device)
+
         # assert music_model_path is not None
         if music_model_path is not None:
             base_weights = torch.load(music_model_path)
@@ -407,10 +401,8 @@ class MotionTransformer(nn.Module):
             self.music_encoder.load_state_dict(new_weights, strict=False)
 
         self.music_encoder.eval()
-        
         self.linear= nn.Linear(64,512)
-
-        music_latent_dim = 512 # change 64 into 512
+        music_latent_dim = 512
 
         # Input Embedding
         self.joint_embed = nn.Linear(self.input_feats, self.latent_dim)
@@ -459,13 +451,11 @@ class MotionTransformer(nn.Module):
         if self.training:
             b, t, d = x.shape
             bs = (b, t)
-            
-            mask = torch.bernoulli(torch.ones(bs, device=device) * self.cond_mask_prob).view((b, t, 1))
 
+            mask = torch.bernoulli(torch.ones(bs, device=device) * self.cond_mask_prob).view((b, t, 1))
             x = x * (1 - mask)
             
         x_proj = self.proj(x)
-            
         return x_proj, x # [B,T,D]
 
     def generate_src_mask(self, T, length):

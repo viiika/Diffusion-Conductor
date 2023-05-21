@@ -4,22 +4,16 @@ import numpy as np
 import argparse
 from os.path import join as pjoin
 
-import utils.paramUtil as paramUtil
-from torch.utils.data import DataLoader
 from utils.plot_script import *
 from utils.get_opt import get_opt
-from datasets.evaluator_models import MotionLenEstimatorBiGRU
 
 from trainers import DDPMTrainer
 from models import MotionTransformer
-from utils.word_vectorizer import WordVectorizer, POS_enumerator
 from utils.utils import *
-from utils.motion_process import recover_from_ric
 import librosa
 import cv2
 from moviepy.editor import VideoFileClip, AudioFileClip
 
-from datasets import Music2MotionDataset
 from scipy.signal import savgol_filter
 import tqdm
 
@@ -30,8 +24,6 @@ def smooth_motion(kp_pred, kernel=11, order=5):
             data_smooth = savgol_filter(data, kernel, order)
             kp_pred[:, i, j] = data_smooth
     return kp_pred
-
-
 
 def vis_img(img, kp_preds, kp_scores, hand_trace):
     """
@@ -47,7 +39,6 @@ def vis_img(img, kp_preds, kp_scores, hand_trace):
     11 LHip, 12 RHip, 
     (discarded: 13 LKnee, 14 Rknee, 15 LAnkle, 16 RAnkle, 17 Neck)
     '''
-
     kp_num = 17
     l_pair = [
         (0, 1), (0, 2), (1, 3), (2, 4),  # Head
@@ -58,8 +49,8 @@ def vis_img(img, kp_preds, kp_scores, hand_trace):
         (11, 12), (5, 11), (6, 12)
     ]
     black = (120, 120, 120)
-    blue = (216, 164, 78)
-    red = (54, 41, 159)
+    blue = (255, 128, 0)
+    red = (51, 41, 255)
     white = (255, 255, 255)
     line_color = [blue, blue, blue, blue,
                   blue, blue, blue, blue, blue,
@@ -113,8 +104,6 @@ def vis_img(img, kp_preds, kp_scores, hand_trace):
 
     return img
 
-
-
 def vis_motion(motions, kp_score=None, save_path='../test/result', name='_[name]_', post_processing=True):
     motions = np.array(motions)
     motions = motions.reshape([motions.shape[0],motions.shape[1],13,2])
@@ -156,15 +145,14 @@ def plot_music2motion(data, result_path, npy_path, title):
     saved_video_file = vis_motion([data], save_path=result_path, name=title)
 
     video = VideoFileClip(saved_video_file)
-    test_samles_dir = '/Users/jinbin/5340Proj/VirtualConductor/test/test_samples/Beethoven Symphony 7.mp3' 
+    test_samles_dir = '/home/zhuoran/code/music/Beethoven Symphony 7.mp3' 
     video = video.set_audio(AudioFileClip(test_samles_dir))
     video.write_videofile(saved_video_file + '.mp4')
-
 
 def extract_mel_feature(audio_file, mel_len_90fps=None):
     y, sr = librosa.load(audio_file)
 
-    #select only first 60s
+    # select only first 60s
     if len(y) > sr * 60:
         y = y[:sr * 60]
 
@@ -191,8 +179,8 @@ def build_models(opt):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--opt_path', type=str, default="/Users/jinbin/5340Proj/alice_dir/my_MotionDiffuse/ssh_MotionDiffuse/text2motion/checkpoints/ConductorMotion100/alice_version_9/opt.txt", help='Opt path')
-    parser.add_argument('--music_path', type=str, default="/Users/jinbin/5340Proj/VirtualConductor/test/test_samples/Beethoven Symphony 7.mp3", help='Music Path for motion generation')
+    parser.add_argument('--opt_path', type=str, default="/home/zhuoran/code/Diffusion_Stage/checkpoints/ConductorMotion100/train/opt.txt", help='Opt path')
+    parser.add_argument('--music_path', type=str, default="/home/zhuoran/code/music/Beethoven Symphony 7.mp3", help='Music Path for motion generation')
     parser.add_argument('--motion_length', type=int, default=60, help='Number of frames for motion generation')
     parser.add_argument('--result_path', type=str, default="test_sample.gif", help='Path to save generation result')
     parser.add_argument('--npy_path', type=str, default="", help='Path to save 3D keypoints sequence')
@@ -210,9 +198,9 @@ if __name__ == '__main__':
     opt.dim_pose = 26
 
     encoder = build_models(opt).to(device)
+    
     trainer = DDPMTrainer(opt, encoder)
-
-    trainer.load(pjoin(opt.model_dir, 'latest.tar'))  
+    trainer.load(pjoin(opt.model_dir, 'latest.tar'))
 
     trainer.eval_mode()
     trainer.to(opt.device)
@@ -225,10 +213,10 @@ if __name__ == '__main__':
             mel = extract_mel_feature(music_path)
             
             pred_motions = trainer.generate_music_motion(mel, opt.dim_pose)
-
             motion = pred_motions[0].cpu().numpy()
-                        
+            motion = motion.reshape([motion.shape[0],13,2])
+
             # motion = motion * std + mean
-            title = " #%d" % motion.shape[0] + 'alice'
+            title = " #%d" % motion.shape[0]
             
             plot_music2motion(motion, args.result_path, args.npy_path, title)

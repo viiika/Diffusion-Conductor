@@ -1,19 +1,12 @@
 import torch
 import torch.nn.functional as F
-import random
 import time
-from models.transformer import MotionTransformer
-from torch.utils.data import DataLoader
 import torch.optim as optim
 from torch.nn.utils import clip_grad_norm_
 import torch.nn.functional as torch_f
 from collections import OrderedDict
 from utils.utils import print_current_loss
 from os.path import join as pjoin
-import codecs as cs
-import torch.distributed as dist
-
-import numpy as np
 
 from mmcv.runner import get_dist_info
 from models.gaussian_diffusion import (
@@ -29,13 +22,9 @@ from datasets import build_dataloader
 
 
 class DDPMTrainer(object):
-
     def __init__(self, args, encoder):
         self.opt = args
-        
         self.device = args.device
-        
-        # print('ddpmtraniner device',self.device)
         self.encoder = encoder
         self.diffusion_steps = args.diffusion_steps
         sampler = 'uniform'
@@ -73,7 +62,6 @@ class DDPMTrainer(object):
     def forward(self, batch_data, eval_mode=False):
         
         caption, motions, m_lens = batch_data
-        #print("caption.shape, motions.shape ", caption.shape, motions.shape) # torch.Size([32, 5400, 128]) torch.Size([32, 1800, 13, 2])
         motions = motions.detach().to(self.device).float()
 
         self.caption = caption # torch.Size([1568, 540, 128])
@@ -95,6 +83,7 @@ class DDPMTrainer(object):
         
         self.velocity_body = output['velocity_body']
         self.velocity_elbow = output['velocity_elbow']
+        self.velocity = output['velocity']
         
         try:
             self.src_mask = self.encoder.module.generate_src_mask(T, cur_len).to(x_start.device)
@@ -106,7 +95,7 @@ class DDPMTrainer(object):
         
         B = len(caption)
         T = min(m_lens.max(), self.encoder.num_frames)
-        output = self.diffusion.p_sample_loop(
+        output = self.diffusion.ddim_sample_loop(
             self.encoder,
             (B, T, dim_pose),
             clip_denoised=False,
@@ -120,14 +109,13 @@ class DDPMTrainer(object):
         return output
 
     def generate_music_motion(self, music_mel, dim_pose, batch_size=1024, idxs=[]):
-        # print(music_mel.shape)#(44735, 128)
         music_mel = torch.from_numpy(music_mel).unsqueeze(0).to(self.device)
        
         xf_proj, xf_out = self.encoder.encode_music(music_mel, self.device)
         B = music_mel.shape[0]
         T = xf_proj.shape[1]
 
-        output = self.diffusion.p_sample_loop(
+        output = self.diffusion.ddim_sample_loop(
             self.encoder,
             (B, T, dim_pose),
             clip_denoised=False,
@@ -139,7 +127,6 @@ class DDPMTrainer(object):
             },
             idxs=idxs)
         return output
-
 
     def generate(self, caption, m_lens, dim_pose, batch_size=1024):
         N = len(caption)
@@ -162,24 +149,29 @@ class DDPMTrainer(object):
         return all_output
 
     def backward_G(self):
+        # Diffusion loss
         loss_mot_rec = self.mse_criterion(self.fake_noise, self.real_noise).mean(dim=-1)
         loss_mot_rec = (loss_mot_rec * self.src_mask).sum() / self.src_mask.sum()
         self.loss_mot_rec = loss_mot_rec
-        
-        elbow_lambda = 0.1
-        
-        # loss_velocity = - elbow_lambda * self.velocity_elbow + self.velocity_body
-        loss_velocity = self.velocity_body
-        loss_velocity = torch.clamp(loss_velocity, min = -0.1, max = 0.1)
-        
+
+        # Velocity loss
+        loss_velocity = self.velocity
         self.loss_velocity = loss_velocity
-        self.loss = loss_mot_rec
+        
+        # Elbow loss
+        loss_velocity_elbow = torch.clamp(self.velocity_elbow, min = -0.0002, max = 0.0002)
+        self.loss_velocity_elbow = loss_velocity_elbow
+        
+        lambda_velocity = 0.1
+        lambda_elbow = 0.1
+
+        self.loss = loss_mot_rec + lambda_velocity * loss_velocity - lambda_elbow * loss_velocity_elbow
         
         loss_logs = OrderedDict({})
         
-        # loss_logs['loss_mot_xy'] = 0.1 * self.loss_mot_xy.item()
         loss_logs['loss_mot_rec'] = self.loss_mot_rec.item()
         loss_logs['loss_velocity'] = self.loss_velocity.item()
+        loss_logs['loss_elbow'] = self.loss_velocity_elbow.item()
         
         return loss_logs
 
@@ -187,7 +179,6 @@ class DDPMTrainer(object):
         self.zero_grad([self.opt_encoder])
         loss_logs = self.backward_G()
         self.loss.backward()
-        # self.loss_mot_rec.backward()
         self.clip_norm([self.encoder])
         self.step([self.opt_encoder])
 
@@ -232,7 +223,7 @@ class DDPMTrainer(object):
 
         if self.opt.is_train:
             self.opt_encoder.load_state_dict(checkpoint['opt_encoder'])
-        self.encoder.load_state_dict(new_checkpoint['encoder'], strict=False) # True
+        self.encoder.load_state_dict(new_checkpoint['encoder'], strict=False)
         return checkpoint['ep'], checkpoint.get('total_it', 0)
 
     def train(self, train_dataset):

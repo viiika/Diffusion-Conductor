@@ -65,7 +65,8 @@ def get_opt(opt_path, device):
     opt.meta_dir = pjoin(opt.save_root, 'meta')
 
     if opt.dataset_name == 'ConductorMotion100':
-        opt.data_root = '/Users/jinbin/5340Proj/dataset/'
+        # opt.data_root = '/Users/jinbin/5340Proj/dataset/'
+        opt.data_root = '/mnt/data/zhuoran/'
         # opt.motion_dir = ''#pjoin(opt.data_root, 'new_joint_vecs')
         # opt.text_dir = ''#pjoin(opt.data_root, 'texts')
         opt.joints_num = 13
@@ -76,7 +77,8 @@ def get_opt(opt_path, device):
         sample_length = 60 # means 60s
         split = 'train'
         limit = None
-        root_dir = '/Users/jinbin/5340Proj/dataset/'
+        # root_dir = '/Users/jinbin/5340Proj/dataset/'
+        root_dir = '/mnt/data/zhuoran/'
     elif opt.dataset_name == 't2m':
         opt.data_root = './data/HumanML3D'
         opt.motion_dir = pjoin(opt.data_root, 'new_joint_vecs')

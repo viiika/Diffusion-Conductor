@@ -77,8 +77,10 @@ def vis_img(img, kp_preds, kp_scores, hand_trace):
         (11, 12), (5, 11), (6, 12)
     ]
     black = (120, 120, 120)
-    blue = (216, 164, 78)
-    red = (54, 41, 159)
+    # blue = (216, 164, 78)
+    blue = (255, 128, 0)
+    # red = (54, 41, 159)
+    red = (51, 41, 255)
     white = (255, 255, 255)
     line_color = [blue, blue, blue, blue,
                   blue, blue, blue, blue, blue,
