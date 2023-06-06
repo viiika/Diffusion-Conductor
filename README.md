@@ -2,25 +2,25 @@
 
 Generated conducting motion according to given music -- Beethoven Symphony 7:
 
-<img src="./assets/images/conduct.gif" alt="image-20230605205823837" style="zoom:20%;" />
+<img src="./assets/images/conduct.gif" alt="image-20230605205823837" width="150" />
 
-# Overview of the proposed framework
+## Overview of the proposed framework
 
 ![](./assets/images/architecture.jpg)
 
-# News
+## News
 - 26/05/2023: Our paper has been accepted by AAAI 2023 Inaugural Summer Symposium Series - AI x Metaverse!
 
 
-# Getting Started
+## Getting Started
 
-## Installation
+### Installation
 
 Please refer to [install.md](/Diffusion_Stage/install.md) for detailed installation.
 
-## Training
+### Training
 
-### Prepare the ConductorMotion100 dataset:
+#### Prepare the ConductorMotion100 dataset:
 
 - The training set：https://pan.baidu.com/s/1Pmtr7V7-9ChJqQp04NOyZg?pwd=3209
 - The validation set：https://pan.baidu.com/s/1B5JrZnFCFvI9ABkuJeWoFQ?pwd=3209 
@@ -61,7 +61,7 @@ tree <Your Dataset Dir>
 
 Each `mel.npy` and `motion.npy` are corresponded to <u>60 seconds</u> of Mel spectrogram and motion data. Their sampling rates are respectively <u>90 Hz</u> and <u>30 Hz</u>. The Mel spectrogram has 128 frequency bins, therefore `mel.shape = (5400, 128)`. The motion data contains 13 2d keypoints, therefore `motion.shape = (1800, 13, 2)`
 
-### Train the music encoder in Contrastive_Stage with the following command:
+#### Train the music encoder in Contrastive_Stage with the following command:
 
 ```shell 
 cd Contrastive_Stage
@@ -69,7 +69,7 @@ cd Contrastive_Stage
 python M2SNet_train.py --dataset_dir <Your Dataset Dir> 
 ```
 
-### Train the diffusion model in Diffusion_Stage with the following command:
+#### Train the diffusion model in Diffusion_Stage with the following command:
 ```shell
 cd Diffusion_Stage
 ```
@@ -85,7 +85,7 @@ python3 -u tools/train.py \
     --gpu_id 1 2
 ```
 
-## Inference and Visualization
+### Inference and Visualization
 ```shell
 cd Diffusion_Stage
 ```
@@ -97,11 +97,11 @@ python -u tools/visualization.py \
     --result_path "test_sample.mp4"
 ```
 
-# Acknowledgement
+## Acknowledgement
 This repo mainly uses code from [VirtualConductor](https://github.com/ChenDelong1999/VirtualConductor) and [MotionDiffuse](https://github.com/mingyuan-zhang/MotionDiffuse).
 
 
-# Papers
+## Papers
 
 1. Delong Chen, Fan Liu*, Zewen Li, Feng Xu. [VirtualConductor: Music-driven Conducting Video Generation System](https://arxiv.org/abs/2108.04350). _IEEE International Conference on Multimedia and Expo (ICME) 2021, [Demo Track (Best Demo)](http://2021.ieeeicme.org/2021.ieeeicme.org/best_demo_awards.html)._
 
