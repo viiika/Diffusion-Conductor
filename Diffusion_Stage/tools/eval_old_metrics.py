@@ -76,7 +76,7 @@ class MotionPretrain():
         self.motion_encoder = MotionEncoder_STGCN()
         
         # load pretrain motion encoder
-        base_weights = torch.load('/home/zhuoran/code/Diffusion_Stage/stage_one_checkpoints/M2SNet_395_208296.pt')
+        base_weights = torch.load('/home/zhuoran/DiffuseConductor/Diffusion_Stage/stage_one_checkpoints/M2SNet_latest.pt')
 
         new_weights = {}
         for key in list(base_weights.keys()):
@@ -111,7 +111,7 @@ def mse_loss(gt_motion, pred_motion):
 # Evaluator (MSE, SE)
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--opt_path', type=str, default="/home/zhuoran/code/Diffusion_Stage/checkpoints/ConductorMotion100/add_velocity_pretrain_no_velocity/opt.txt", help='Opt path')
+    parser.add_argument('--opt_path', type=str, default="/home/zhuoran/DiffuseConductor/Diffusion_Stage/checkpoints/ConductorMotion100/add_velocity_pretrain_no_velocity/opt.txt", help='Opt path')
     parser.add_argument('--gpu_id', type=int, default=5, help="which gpu to use")
     
     args = parser.parse_args()

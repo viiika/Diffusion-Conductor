@@ -14,8 +14,8 @@ from mmcv.parallel import MMDistributedDataParallel, MMDataParallel
 import torch
 import torch.distributed as dist
 
-torch.cuda.set_device(1)
-os.environ['CUDA_VISIBLE_DEVICES'] ='1, 2'
+torch.cuda.set_device(4)
+os.environ['CUDA_VISIBLE_DEVICES'] ='4, 5, 6'
 
 def build_models(opt, dim_pose):
     encoder = MotionTransformer(
@@ -57,18 +57,6 @@ if __name__ == '__main__':
         split = 'train'
         limit = None
         root_dir = '/mnt/data/zhuoran/'
-        
-    elif opt.dataset_name == 'kit':
-        opt.data_root = './data/KIT-ML'
-        opt.motion_dir = pjoin(opt.data_root, 'new_joint_vecs')
-        opt.text_dir = pjoin(opt.data_root, 'texts')
-        opt.joints_num = 21
-        radius = 240 * 8
-        fps = 12.5
-        dim_pose = 251
-        opt.max_motion_length = 196
-        kinematic_chain = paramUtil.kit_kinematic_chain
-
     else:
         raise KeyError('Dataset Does Not Exist')
 

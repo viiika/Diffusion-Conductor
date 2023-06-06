@@ -1,8 +1,18 @@
 # Taming Diffusion Models for Music-driven Conducting Motion Generation
 
-## Overview of the proposed framework
+Generated conducting motion according to given music -- Beethoven Symphony 7:
+
+<img src="./assets/images/conduct.gif" alt="image-20230605205823837" style="zoom:50%;" />
+
+# Overview of the proposed framework
 
 ![](./assets/images/architecture.jpg)
+
+# News
+- 26/05/2023: Our paper has been accepted by AAAI 2023 Inaugural Summer Symposium Series - AI x Metaverse!
+
+
+# Getting Started
 
 ## Installation
 
@@ -60,10 +70,10 @@ python M2SNet_train.py --dataset_dir <Your Dataset Dir>
 ```
 
 ### Train the diffusion model in Diffusion_Stage with the following command:
-
 ```shell
 cd Diffusion_Stage
-
+```
+```shell
 PYTHONPATH="$(dirname $0)/..":$PYTHONPATH \
 python3 -u tools/train.py \
     --name checkpoint_folder_name \
@@ -76,10 +86,10 @@ python3 -u tools/train.py \
 ```
 
 ## Inference and Visualization
-
 ```shell
 cd Diffusion_Stage
-
+```
+```shell
 PYTHONPATH="$(dirname $0)/..":$PYTHONPATH \
 python -u tools/visualization.py \
     --motion_length 6 \
@@ -87,11 +97,11 @@ python -u tools/visualization.py \
     --result_path "test_sample.mp4"
 ```
 
-## Acknowledgement
+# Acknowledgement
 This repo mainly uses code from [VirtualConductor](https://github.com/ChenDelong1999/VirtualConductor) and [MotionDiffuse](https://github.com/mingyuan-zhang/MotionDiffuse).
 
 
-## Papers
+# Papers
 
 1. Delong Chen, Fan Liu*, Zewen Li, Feng Xu. [VirtualConductor: Music-driven Conducting Video Generation System](https://arxiv.org/abs/2108.04350). _IEEE International Conference on Multimedia and Expo (ICME) 2021, [Demo Track (Best Demo)](http://2021.ieeeicme.org/2021.ieeeicme.org/best_demo_awards.html)._
 

@@ -18,7 +18,7 @@ class TrainCompOptions(BaseOptions):
 
         self.parser.add_argument('--feat_bias', type=float, default=25, help='Scales for global motion features and foot contact')
 
-        self.parser.add_argument('--is_continue', default=True, action="store_true", help='Is this trail continued from previous trail?')
+        self.parser.add_argument('--is_continue', default=False, action="store_true", help='Is this trail continued from previous trail?')
 
         self.parser.add_argument('--log_every', type=int, default=5, help='Frequency of printing training progress (by iteration)')
         self.parser.add_argument('--save_every_e', type=int, default=5, help='Frequency of saving models (by epoch)')

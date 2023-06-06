@@ -369,7 +369,7 @@ class MotionTransformer(nn.Module):
                  activation="gelu", 
                  device = 'cuda',
                  text_num_heads=4,
-                 music_model_path='/home/zhuoran/code/Diffusion_Stage/stage_one_checkpoints/M2SNet_395_208296.pt',
+                 music_model_path='/home/zhuoran/DiffuseConductor/Diffusion_Stage/stage_one_checkpoints/M2SNet_latest.pt',
                  no_eff=False,
                  **kargs):
         super().__init__()

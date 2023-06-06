@@ -3,6 +3,7 @@ import torch.nn.functional as F
 import time
 import torch.optim as optim
 from torch.nn.utils import clip_grad_norm_
+import torch.nn as nn
 import torch.nn.functional as torch_f
 from collections import OrderedDict
 from utils.utils import print_current_loss
@@ -19,6 +20,63 @@ from models.gaussian_diffusion import (
 )
 
 from datasets import build_dataloader
+from models.ST_GCN.ST_GCN import ST_GCN
+
+
+# Motion Encoder
+class MotionEncoder_STGCN(nn.Module):
+    def __init__(self):
+        super(MotionEncoder_STGCN, self).__init__()
+        self.graph_args = {}
+        self.st_gcn = ST_GCN(in_channels=2,
+                             out_channels=32,
+                             graph_args=self.graph_args,
+                             edge_importance_weighting=True,
+                             mode='M2S')
+        self.fc = nn.Sequential(nn.Conv1d(32 * 13, 64, kernel_size=1), nn.BatchNorm1d(64)) # change 64 into 512
+
+    def forward(self, input):
+        input = input.transpose(1, 2)
+        input = input.transpose(1, 3)
+        input = input.unsqueeze(4)
+
+        output = self.st_gcn(input)
+        output = output.transpose(1, 2)
+        output = torch.flatten(output, start_dim=2)
+        output = self.fc(output.transpose(1, 2)).transpose(1, 2)
+
+        return output
+
+    def features(self, input):
+        input = input.transpose(1, 2)
+        input = input.transpose(1, 3)
+        input = input.unsqueeze(4)
+
+        output = self.st_gcn(input)
+        output = output.transpose(1, 2)
+        output = torch.flatten(output, start_dim=2)
+        output = self.fc(output.transpose(1, 2)).transpose(1, 2)
+
+        features = self.st_gcn.extract_feature(input)
+        features.append(output.transpose(1, 2))
+
+        return features
+
+# Load pretrain motion encoder
+class MotionPretrain():
+    def __init__(self):
+        super(MotionPretrain, self).__init__()
+        self.motion_encoder = MotionEncoder_STGCN()
+        
+        base_weights = torch.load('/home/zhuoran/DiffuseConductor/Diffusion_Stage/stage_one_checkpoints/M2SNet_latest.pt')
+
+        new_weights = {}
+        for key in list(base_weights.keys()):
+            if key.startswith('module.motion_encoder'):
+                new_weights[key.replace('module.motion_encoder.', '')] = base_weights[key]
+                
+        self.motion_encoder.load_state_dict(new_weights, strict=True)
+        self.motion_encoder.eval()
 
 
 class DDPMTrainer(object):
@@ -42,7 +100,12 @@ class DDPMTrainer(object):
 
         if args.is_train:
             self.mse_criterion = torch.nn.MSELoss(reduction='none')
+        
+        motion_pretrain = MotionPretrain()
+        self.motion_encoder = motion_pretrain.motion_encoder.to(self.device)
+        
         self.to(self.device)
+    
 
     @staticmethod
     def zero_grad(opt_list):
@@ -68,7 +131,8 @@ class DDPMTrainer(object):
         self.motions = motions # torch.Size([1568, 180, 13, 2])
         
         x_start = motions
-        B, T = x_start.shape[:2]
+        B, T = x_start.shape[:2] # batch_size, 900
+        
         cur_len = torch.LongTensor([min(T, m_len) for m_len in  m_lens]).to(self.device)
         t, _ = self.sampler.sample(B, x_start.device)
         output = self.diffusion.training_losses(
@@ -86,9 +150,9 @@ class DDPMTrainer(object):
         self.velocity = output['velocity']
         
         try:
-            self.src_mask = self.encoder.module.generate_src_mask(T, cur_len).to(x_start.device)
+            self.src_mask = self.encoder.module.generate_src_mask(64, cur_len).to(x_start.device)
         except:
-            self.src_mask = self.encoder.generate_src_mask(T, cur_len).to(x_start.device)
+            self.src_mask = self.encoder.generate_src_mask(64, cur_len).to(x_start.device)
 
     def generate_batch(self, caption, m_lens, dim_pose, idxs=[]):
         xf_proj, xf_out = self.encoder.encode_text(caption, self.device)
@@ -150,7 +214,15 @@ class DDPMTrainer(object):
 
     def backward_G(self):
         # Diffusion loss
-        loss_mot_rec = self.mse_criterion(self.fake_noise, self.real_noise).mean(dim=-1)
+        fake_noise = self.fake_noise.reshape([self.fake_noise.shape[0], self.fake_noise.shape[1], int(self.fake_noise.shape[2]/2), 2]).to(self.device)
+        real_noise = self.real_noise.reshape([self.real_noise.shape[0], self.real_noise.shape[1], int(self.real_noise.shape[2]/2), 2]).to(self.device)
+        
+        fake_noise_feat = self.motion_encoder.features(fake_noise)[-1] # (40, 64, 900)
+        real_noise_feat = self.motion_encoder.features(real_noise)[-1]
+        
+        # loss_mot_rec = self.mse_criterion(self.fake_noise, self.real_noise).mean(dim=-1) # (64, 900, 26)
+        loss_mot_rec = self.mse_criterion(fake_noise_feat, real_noise_feat).mean(dim=-1) # (64, 900, 26)
+        
         loss_mot_rec = (loss_mot_rec * self.src_mask).sum() / self.src_mask.sum()
         self.loss_mot_rec = loss_mot_rec
 

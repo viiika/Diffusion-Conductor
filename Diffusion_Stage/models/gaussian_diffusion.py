@@ -1064,38 +1064,19 @@ class GaussianDiffusion:
                 ModelMeanType.EPSILON: noise,
             }[self.model_mean_type]
 
-            # print('model_output.shape: ', model_output.shape)
-            # print('target.shape: ', target.shape)
-            # print('x_start.shape: ', x_start.shape)
-
-            # model_output = model_output.reshape([model_output.shape[0], model_output.shape[1], int(model_output.shape[2]/2), 2])
-            # print('model_output.shape2: ', model_output.shape)
-
             target = target.reshape([target.shape[0], target.shape[1], target.shape[2]*target.shape[3]])
             x_start = x_start.reshape([x_start.shape[0], x_start.shape[1], x_start.shape[2]*x_start.shape[3]])
-
-            # print('target.shape2: ', target.shape)
-            # print('x_start.shape2: ', x_start.shape)
 
             # assert model_output.shape == target.shape == x_start.shape
             # terms["mse"] = mean_flat((target - model_output) ** 2).view(-1, 1).mean(-1)
             
             assert model_output.shape == target.shape == x_start.shape
-            # body_joints_idx = [5,6,11,12]
             body_joints_idx = [10,11,12,13,22,23,24,25]
-            # elbow_joints_idx = [7,8]
             elbow_joints_idx = [14,15,16,17,18,19,20,21]
-            # elbow_joints_idx = [18,19,20,21]
 
             terms["mse"] = mean_flat((target - model_output) ** 2).view(-1, 1).mean(-1)
             terms["velocity_body"] = mean_flat((model_output[:,1:,body_joints_idx] - model_output[:,:-1,body_joints_idx]) ** 2).view(-1).mean(-1)
             terms["velocity_elbow"] = mean_flat((model_output[:,1:,elbow_joints_idx] - model_output[:,:-1,elbow_joints_idx]) ** 2).view(-1).mean(-1)
-            
-            velocity_target = target[:,1:] - target[:,:-1]
-            velocity_pred = model_output[:,1:] - model_output[:,:-1]
-            
-            # print('velocity_target: ', velocity_target)
-            # print('velocity_pred: ', velocity_pred)
 
             terms["velocity"] = mean_flat(((target[:,1:] - target[:,:-1]) - (model_output[:,1:] - model_output[:,:-1])) ** 2).view(-1).mean(-1)
             
