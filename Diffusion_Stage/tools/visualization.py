@@ -179,7 +179,7 @@ def build_models(opt):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--opt_path', type=str, default="/home/zhuoran/code/Diffusion_Stage/checkpoints/ConductorMotion100/train/opt.txt", help='Opt path')
+    parser.add_argument('--opt_path', type=str, default="/home/zhuoran/DiffuseConductor/Diffusion_Stage/checkpoints/ConductorMotion100/train/opt.txt", help='Opt path')
     parser.add_argument('--music_path', type=str, default="/home/zhuoran/code/music/Beethoven Symphony 7.mp3", help='Music Path for motion generation')
     parser.add_argument('--motion_length', type=int, default=60, help='Number of frames for motion generation')
     parser.add_argument('--result_path', type=str, default="test_sample.gif", help='Path to save generation result')

@@ -80,7 +80,7 @@ class MotionPretrain():
         super(MotionPretrain, self).__init__()
         self.motion_encoder = MotionEncoder_STGCN()
         
-        base_weights = torch.load('/home/zhuoran/code/Diffusion_Stage/stage_one_checkpoints/M2SNet_latest.pt')
+        base_weights = torch.load('/home/zhuoran/DiffuseConductor/Diffusion_Stage/stage_one_checkpoints/M2SNet_latest.pt')
 
         new_weights = {}
         for key in list(base_weights.keys()):
@@ -341,7 +341,7 @@ class Evaluator():
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--opt_path', type=str, default="/home/zhuoran/code/Diffusion_Stage/checkpoints/ConductorMotion100/add_velocity_pretrain_elbow_clamp_lambda/opt.txt", help='Opt path')
+    parser.add_argument('--opt_path', type=str, default="/home/zhuoran/DiffuseConductor/Diffusion_Stage/checkpoints/ConductorMotion100/add_velocity_pretrain_elbow_clamp_lambda/opt.txt", help='Opt path')
     parser.add_argument('--gpu_id', type=int, default=5, help="which gpu to use")
     
     args = parser.parse_args()
