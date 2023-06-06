@@ -2,7 +2,7 @@
 
 Generated conducting motion according to given music -- Beethoven Symphony 7:
 
-<img src="./assets/images/conduct.gif" alt="image-20230605205823837" width="150" />
+<img src="./assets/images/conduct.gif" alt="image-20230605205823837" width="300" />
 
 ## Overview of the proposed framework
 
