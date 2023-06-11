@@ -2,12 +2,12 @@
 
 Generated conducting motion according to given music -- Tchaikovsky Piano Concerto No.1:
 
-https://github.com/viiika/Diffusion-Conductor/assets/40078051/c5b6b255-06fa-4fd9-8046-0b861fd36138
+https://github.com/viiika/Diffusion-Conductor/assets/40078051/d993df28-29a0-4520-a429-19fb2cc0a546
 
 <br/>
 Generated conducting motion according to given music -- Beethoven Symphony No.7:
 
-https://github.com/viiika/Diffusion-Conductor/assets/40078051/027859eb-d598-4592-8669-133dcb286518
+https://github.com/viiika/Diffusion-Conductor/assets/40078051/3bf56f68-6d3e-441a-91a5-3235930200f8
 
 
 ## Overview of the proposed framework
