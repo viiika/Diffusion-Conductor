@@ -1,15 +1,19 @@
 # Taming Diffusion Models for Music-driven Conducting Motion Generation
 
-Generated conducting motion according to given music -- Beethoven Symphony 7:
+Generated conducting motion according to given music -- Tchaikovsky Piano Concerto No.1:
 
-<img src="./assets/images/conduct.gif" alt="image-20230605205823837" width="300" />
+<video src="./assets/images/Tchaikovsky.mp4" width=300></video>
+
+Generated conducting motion according to given music -- Beethoven Symphony No.7:
+
+<video src="./assets/images/Beethoven.mp4" width=300></video>
 
 ## Overview of the proposed framework
 
 ![](./assets/images/architecture.jpg)
 
 ## News
-- 26/05/2023: Our paper has been accepted by AAAI 2023 Inaugural Summer Symposium Series - AI x Metaverse!
+- 26/05/2023: Our paper has been accepted by AAAI 2023 Inaugural Summer Symposium Series - AI x Metaverse Track!
 
 
 ## Getting Started
@@ -97,8 +101,11 @@ python -u tools/visualization.py \
     --result_path "test_sample.mp4"
 ```
 
+### Download the pretrained model
+For evaluation and inference, you may download the contrastive stage pretrained model and the diffusion stage pretrained model from [GoogleDrive](https://drive.google.com/drive/folders/1l2jvAudk6w5UuAKH3ZMM20qLChmkegb2?usp=drive_link).
+
 ## Acknowledgement
-This repo mainly uses code from [VirtualConductor](https://github.com/ChenDelong1999/VirtualConductor) and [MotionDiffuse](https://github.com/mingyuan-zhang/MotionDiffuse).
+We would like to thank to the great projects in [VirtualConductor](https://github.com/ChenDelong1999/VirtualConductor) and [MotionDiffuse](https://github.com/mingyuan-zhang/MotionDiffuse).
 
 
 ## Papers
