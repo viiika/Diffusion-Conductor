@@ -3,3 +3,7 @@
 **/checkpoints
 **/stage_one_checkpoints
 **/*.txt
+*.mp4
+*.avi
+*.mp3
+!assets/images/Tchaikovsky.mp4
