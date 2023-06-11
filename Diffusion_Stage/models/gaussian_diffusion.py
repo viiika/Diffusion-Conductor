@@ -1071,19 +1071,17 @@ class GaussianDiffusion:
             # terms["mse"] = mean_flat((target - model_output) ** 2).view(-1, 1).mean(-1)
             
             assert model_output.shape == target.shape == x_start.shape
-            body_joints_idx = [10,11,12,13,22,23,24,25]
-            elbow_joints_idx = [14,15,16,17,18,19,20,21]
+
+            body_joints_idx = [10, 11, 12, 13, 22, 23, 24, 25]
+            elbow_joints_idx = [14, 15, 16, 17, 18, 19, 20, 21]
+            head_joints_idx = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
             terms["mse"] = mean_flat((target - model_output) ** 2).view(-1, 1).mean(-1)
             terms["velocity_body"] = mean_flat((model_output[:,1:,body_joints_idx] - model_output[:,:-1,body_joints_idx]) ** 2).view(-1).mean(-1)
             terms["velocity_elbow"] = mean_flat((model_output[:,1:,elbow_joints_idx] - model_output[:,:-1,elbow_joints_idx]) ** 2).view(-1).mean(-1)
-
+            terms["velocity_head"] = mean_flat((model_output[:,1:,head_joints_idx] - model_output[:,:-1,head_joints_idx]) ** 2).view(-1).mean(-1)
             terms["velocity"] = mean_flat(((target[:,1:] - target[:,:-1]) - (model_output[:,1:] - model_output[:,:-1])) ** 2).view(-1).mean(-1)
             
-            # if "vb" in terms:
-            #     terms["loss"] = terms["mse"] + terms["vb"]
-            # else:
-            #     terms["loss"] = terms["mse"]
             terms["target"] = target
             terms["pred"] = model_output
         else:

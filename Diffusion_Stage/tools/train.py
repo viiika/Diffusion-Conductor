@@ -14,8 +14,8 @@ from mmcv.parallel import MMDistributedDataParallel, MMDataParallel
 import torch
 import torch.distributed as dist
 
-torch.cuda.set_device(4)
-os.environ['CUDA_VISIBLE_DEVICES'] ='4, 5, 6'
+torch.cuda.set_device(3)
+os.environ['CUDA_VISIBLE_DEVICES'] ='3'
 
 def build_models(opt, dim_pose):
     encoder = MotionTransformer(
