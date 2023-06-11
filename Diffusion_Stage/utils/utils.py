@@ -54,7 +54,7 @@ def print_current_loss(start_time, niter_state, losses, epoch=None, inner_iter=N
     message = '%s'%(as_minutes(now - start_time))
 
     for k, v in losses.items():
-        message += ' %s: %.4f ' % (k, v)
+        message += ' %s: %.7f ' % (k, v)
     print(message)
 
 

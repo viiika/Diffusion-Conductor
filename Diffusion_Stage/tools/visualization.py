@@ -145,7 +145,7 @@ def plot_music2motion(data, result_path, npy_path, title):
     saved_video_file = vis_motion([data], save_path=result_path, name=title)
 
     video = VideoFileClip(saved_video_file)
-    test_samles_dir = '/home/zhuoran/code/music/Beethoven Symphony 7.mp3' 
+    test_samles_dir = '/home/zhuoran/DiffuseConductor/assets/music/Beethoven Symphony 7.mp3' 
     video = video.set_audio(AudioFileClip(test_samles_dir))
     video.write_videofile(saved_video_file + '.mp4')
 
@@ -180,7 +180,7 @@ def build_models(opt):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--opt_path', type=str, default="/home/zhuoran/DiffuseConductor/Diffusion_Stage/checkpoints/ConductorMotion100/train/opt.txt", help='Opt path')
-    parser.add_argument('--music_path', type=str, default="/home/zhuoran/code/music/Beethoven Symphony 7.mp3", help='Music Path for motion generation')
+    parser.add_argument('--music_path', type=str, default="/home/zhuoran/DiffuseConductor/assets/music/Beethoven Symphony 7.mp3", help='Music Path for motion generation')
     parser.add_argument('--motion_length', type=int, default=60, help='Number of frames for motion generation')
     parser.add_argument('--result_path', type=str, default="test_sample.gif", help='Path to save generation result')
     parser.add_argument('--npy_path', type=str, default="", help='Path to save 3D keypoints sequence')
@@ -201,6 +201,7 @@ if __name__ == '__main__':
     
     trainer = DDPMTrainer(opt, encoder)
     trainer.load(pjoin(opt.model_dir, 'latest.tar'))
+    # trainer.load(pjoin(opt.model_dir, 'ckpt_e475.tar'))
 
     trainer.eval_mode()
     trainer.to(opt.device)

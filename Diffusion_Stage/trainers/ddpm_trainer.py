@@ -100,6 +100,7 @@ class DDPMTrainer(object):
 
         if args.is_train:
             self.mse_criterion = torch.nn.MSELoss(reduction='none')
+            self.l1_criterion = torch.nn.L1Loss()
         
         motion_pretrain = MotionPretrain()
         self.motion_encoder = motion_pretrain.motion_encoder.to(self.device)
@@ -121,6 +122,12 @@ class DDPMTrainer(object):
     def step(opt_list):
         for opt in opt_list:
             opt.step()
+            
+    def mean_flat(self, tensor):
+        """
+        Take the mean over all non-batch dimensions.
+        """
+        return tensor.mean(dim=list(range(1, len(tensor.shape))))
 
     def forward(self, batch_data, eval_mode=False):
         
@@ -147,12 +154,13 @@ class DDPMTrainer(object):
         
         self.velocity_body = output['velocity_body']
         self.velocity_elbow = output['velocity_elbow']
+        self.velocity_head = output['velocity_head']
         self.velocity = output['velocity']
         
         try:
-            self.src_mask = self.encoder.module.generate_src_mask(64, cur_len).to(x_start.device)
+            self.src_mask = self.encoder.module.generate_src_mask(T, cur_len).to(x_start.device)
         except:
-            self.src_mask = self.encoder.generate_src_mask(64, cur_len).to(x_start.device)
+            self.src_mask = self.encoder.generate_src_mask(T, cur_len).to(x_start.device)
 
     def generate_batch(self, caption, m_lens, dim_pose, idxs=[]):
         xf_proj, xf_out = self.encoder.encode_text(caption, self.device)
@@ -220,11 +228,14 @@ class DDPMTrainer(object):
         fake_noise_feat = self.motion_encoder.features(fake_noise)[-1] # (40, 64, 900)
         real_noise_feat = self.motion_encoder.features(real_noise)[-1]
         
-        # loss_mot_rec = self.mse_criterion(self.fake_noise, self.real_noise).mean(dim=-1) # (64, 900, 26)
-        loss_mot_rec = self.mse_criterion(fake_noise_feat, real_noise_feat).mean(dim=-1) # (64, 900, 26)
-        
+        # MSE loss
+        loss_mot_rec = self.mse_criterion(self.fake_noise, self.real_noise).mean(dim=-1) # (64, 900, 26)
         loss_mot_rec = (loss_mot_rec * self.src_mask).sum() / self.src_mask.sum()
         self.loss_mot_rec = loss_mot_rec
+        
+        # Latent feature loss
+        loss_mot_feat = self.l1_criterion(fake_noise_feat, real_noise_feat).mean(dim=-1) # (64, 900, 26)
+        self.loss_mot_feat = self.mean_flat(loss_mot_feat).view(-1).mean(-1)
 
         # Velocity loss
         loss_velocity = self.velocity
@@ -234,16 +245,25 @@ class DDPMTrainer(object):
         loss_velocity_elbow = torch.clamp(self.velocity_elbow, min = -0.0002, max = 0.0002)
         self.loss_velocity_elbow = loss_velocity_elbow
         
+        # Head loss
+        loss_velocity_head = self.velocity_head
+        self.loss_velocity_head = loss_velocity_head
+        
         lambda_velocity = 0.1
         lambda_elbow = 0.1
+        lambda_head = 0.1
+        lambda_feat = 0.000001
+        lambda_rec = 1
 
-        self.loss = loss_mot_rec + lambda_velocity * loss_velocity - lambda_elbow * loss_velocity_elbow
+        self.loss = lambda_rec * self.loss_mot_rec + lambda_feat * self.loss_mot_feat + lambda_velocity * self.loss_velocity - lambda_elbow * self.loss_velocity_elbow + lambda_head * self.loss_velocity_head
         
         loss_logs = OrderedDict({})
         
-        loss_logs['loss_mot_rec'] = self.loss_mot_rec.item()
-        loss_logs['loss_velocity'] = self.loss_velocity.item()
-        loss_logs['loss_elbow'] = self.loss_velocity_elbow.item()
+        loss_logs['loss_mot_rec'] = lambda_rec * self.loss_mot_rec.item()
+        loss_logs['loss_mot_feat'] = lambda_feat * self.loss_mot_feat.item()
+        loss_logs['loss_velocity'] = lambda_velocity * self.loss_velocity.item()
+        loss_logs['loss_elbow'] = lambda_elbow * self.loss_velocity_elbow.item()
+        loss_logs['loss_head'] = lambda_head * self.loss_velocity_head
         
         return loss_logs
 
