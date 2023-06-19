@@ -15,8 +15,6 @@ https://github.com/viiika/Diffusion-Conductor/assets/40078051/3bf56f68-6d3e-441a
 ![](./assets/images/architecture.jpg)
 
 ## News
-- 26/05/2023: Our paper has been accepted by AAAI 2023 Inaugural Summer Symposium Series - AI x Metaverse Track!
-
 
 ## Getting Started
 
