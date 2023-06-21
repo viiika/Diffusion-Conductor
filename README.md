@@ -110,52 +110,15 @@ We would like to thank to the great projects in [VirtualConductor](https://githu
 
 ## Papers
 
-1. Delong Chen, Fan Liu*, Zewen Li, Feng Xu. [VirtualConductor: Music-driven Conducting Video Generation System](https://arxiv.org/abs/2108.04350). _IEEE International Conference on Multimedia and Expo (ICME) 2021, [Demo Track (Best Demo)](http://2021.ieeeicme.org/2021.ieeeicme.org/best_demo_awards.html)._
-
-   ```bibtex
-   @article{chen2021virtualconductor,
-     author    = {Delong Chen and
-                  Fan Liu and
-                  Zewen Li and
-                  Feng Xu},
-     title     = {VirtualConductor: Music-driven Conducting Video Generation System},
-     journal   = {CoRR},
-     volume    = {abs/2108.04350},
-     year      = {2021},
-     url       = {https://arxiv.org/abs/2108.04350},
-     eprinttype = {arXiv},
-     eprint    = {2108.04350}
-   }
-   ```
-
-2. Fan Liu, Delong Chen*, Ruizhi Zhou, Sai Yang, and Feng Xu. [Self-Supervised Music-Motion Synchronization Learning for Music-Driven Conducting Motion Generation](https://link.springer.com/article/10.1007/s11390-022-2030-z). _Journal of Computer Science and Technology_.
-
-   ```bibtex
-    @article{liu2022self,
-      author    = {Fan Liu and
-                   Delong Chen and
-                   Ruizhi Zhou and
-                   Sai Yang and
-                   Feng Xu},
-      title     = {Self-Supervised Music Motion Synchronization Learning for Music-Driven
-                   Conducting Motion Generation},
-      journal   = {Journal of Computer Science and Technology},
-      volume    = {37},
-      number    = {3},
-      pages     = {539--558},
-      year      = {2022},
-      url       = {https://doi.org/10.1007/s11390-022-2030-z},
-      doi       = {10.1007/s11390-022-2030-z}
-    }
-   ```
-
-3. Zhang, Mingyuan and Cai, Zhongang and Pan, Liang and Hong, Fangzhou and Guo, Xinying and Yang, Lei and Liu, Ziwei. [Motiondiffuse: Text-driven human motion generation with diffusion model](https://arxiv.org/abs/2208.15001)
+1. Zhuoran Zhao and Jinbin Bai* and Delong Chen and Debang Wang and Yubo Pan. [Taming Diffusion Models for Music-driven Conducting Motion Generation](https://arxiv.org/abs/2306.10065)
 
     ```bibtex
-    @article{zhang2022motiondiffuse,
-      title={Motiondiffuse: Text-driven human motion generation with diffusion model},
-      author={Zhang, Mingyuan and Cai, Zhongang and Pan, Liang and Hong, Fangzhou and Guo, Xinying and Yang, Lei and Liu, Ziwei},
-      journal={arXiv preprint arXiv:2208.15001},
-      year={2022}
+    @misc{zhao2023taming,
+      title={Taming Diffusion Models for Music-driven Conducting Motion Generation}, 
+      author={Zhuoran Zhao and Jinbin Bai and Delong Chen and Debang Wang and Yubo Pan},
+      year={2023},
+      eprint={2306.10065},
+      archivePrefix={arXiv},
+      primaryClass={eess.AS}
     }
     ```
