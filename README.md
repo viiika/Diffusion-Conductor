@@ -1,11 +1,13 @@
 # Taming Diffusion Models for Music-driven Conducting Motion Generation
 
-# Overview
+## Overview
 ![](./assets/images/visualization.png)
 
-Generated conducting motion according to given music -- Tchaikovsky Piano Concerto No.1:
+<br/>
 
-https://github.com/viiika/Diffusion-Conductor/assets/40078051/d993df28-29a0-4520-a429-19fb2cc0a546
+- Generated conducting motion according to given music -- Tchaikovsky Piano Concerto No.1:
+
+    https://github.com/viiika/Diffusion-Conductor/assets/40078051/d993df28-29a0-4520-a429-19fb2cc0a546
 
 <!-- <br/> -->
 <!-- Generated conducting motion according to given music -- Beethoven Symphony No.7:
@@ -17,7 +19,7 @@ https://github.com/viiika/Diffusion-Conductor/assets/40078051/3bf56f68-6d3e-441a
 
 ![](./assets/images/architecture.jpg) -->
 
-## Features
+### Features
 - Objective: We present **Diffusion-Conductor**, a novel DDIM-
 based approach for music-driven conducting motion generation.
 - Contributions: 
@@ -27,11 +29,11 @@ music-driven conducting motion generation.
 the better performances, which will inspire later research on motion generation field.
 - Benchmark Performance: Ourperform state-of-the-art methods on all four metrics: MSE, FGD, BC, Diversity.
 
-# News
+## News
 
 - 18/07/2023: Our paper won the Best Paper Award for AAAI 2023 Inangural Summer Symposium!
 
-# Getting Started
+## Getting Started
 
 ### Installation
 
