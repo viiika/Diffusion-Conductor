@@ -5,7 +5,7 @@
 
 <br/>
 
-- Generated conducting motion according to given music -- Tchaikovsky Piano Concerto No.1:
+- Generated conducting motion according to the given music -- Tchaikovsky Piano Concerto No.1:
 
     https://github.com/viiika/Diffusion-Conductor/assets/40078051/d993df28-29a0-4520-a429-19fb2cc0a546
 
@@ -20,12 +20,11 @@ https://github.com/viiika/Diffusion-Conductor/assets/40078051/3bf56f68-6d3e-441a
 ![](./assets/images/architecture.jpg) -->
 
 ### Features
-- Objective: We present **Diffusion-Conductor**, a novel DDIM-
-based approach for music-driven conducting motion generation.
+- Objective: We present **Diffusion-Conductor**, a novel DDIM-based approach for music-driven conducting motion generation.
 - Contributions: 
     - First work to use diffusion model for
 music-driven conducting motion generation.
-    - Modify the supervision signal from ε to x0 to achieve
+    - Modify the supervision signal from `ε` to `x0` to achieve
 the better performances, which will inspire later research on motion generation field.
 - Benchmark Performance: Ourperform state-of-the-art methods on all four metrics: MSE, FGD, BC, Diversity.
 
