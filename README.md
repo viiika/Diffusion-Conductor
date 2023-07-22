@@ -1,22 +1,37 @@
 # Taming Diffusion Models for Music-driven Conducting Motion Generation
 
+# Overview
+![](./assets/images/visualization.png)
+
 Generated conducting motion according to given music -- Tchaikovsky Piano Concerto No.1:
 
 https://github.com/viiika/Diffusion-Conductor/assets/40078051/d993df28-29a0-4520-a429-19fb2cc0a546
 
-<br/>
-Generated conducting motion according to given music -- Beethoven Symphony No.7:
+<!-- <br/> -->
+<!-- Generated conducting motion according to given music -- Beethoven Symphony No.7:
 
-https://github.com/viiika/Diffusion-Conductor/assets/40078051/3bf56f68-6d3e-441a-91a5-3235930200f8
+https://github.com/viiika/Diffusion-Conductor/assets/40078051/3bf56f68-6d3e-441a-91a5-3235930200f8 -->
 
 
-## Overview of the proposed framework
+<!-- ## Overview of the proposed framework
 
-![](./assets/images/architecture.jpg)
+![](./assets/images/architecture.jpg) -->
 
-## News
+## Features
+- Objective: We present **Diffusion-Conductor**, a novel DDIM-
+based approach for music-driven conducting motion generation.
+- Contributions: 
+    - First work to use diffusion model for
+music-driven conducting motion generation.
+    - Modify the supervision signal from ε to x0 to achieve
+the better performances, which will inspire later research on motion generation field.
+- Benchmark Performance: Ourperform state-of-the-art methods on all four metrics: MSE, FGD, BC, Diversity.
 
-## Getting Started
+# News
+
+- 18/07/2023: Our paper won the Best Paper Award for AAAI 2023 Inangural Summer Symposium!
+
+# Getting Started
 
 ### Installation
 
@@ -65,11 +80,13 @@ tree <Your Dataset Dir>
 
 Each `mel.npy` and `motion.npy` are corresponded to <u>60 seconds</u> of Mel spectrogram and motion data. Their sampling rates are respectively <u>90 Hz</u> and <u>30 Hz</u>. The Mel spectrogram has 128 frequency bins, therefore `mel.shape = (5400, 128)`. The motion data contains 13 2d keypoints, therefore `motion.shape = (1800, 13, 2)`
 
-#### Train the music encoder in Contrastive_Stage with the following command:
+#### Train the music encoder and motion encoder in Contrastive_Stage with the following command:
 
 ```shell 
 cd Contrastive_Stage
+```
 
+```
 python M2SNet_train.py --dataset_dir <Your Dataset Dir> 
 ```
 
@@ -98,7 +115,7 @@ PYTHONPATH="$(dirname $0)/..":$PYTHONPATH \
 python -u tools/visualization.py \
     --motion_length 6 \
     --gpu_id 5 \
-    --result_path "test_sample.mp4"
+    --result_path "conduct_example.mp4"
 ```
 
 ### Download the pretrained model
