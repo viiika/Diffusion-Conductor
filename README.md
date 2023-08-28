@@ -1,5 +1,7 @@
 # Taming Diffusion Models for Music-driven Conducting Motion Generation
 
+Accepted by AAAI 2023 Summer Symposium, with Best Paper Award.
+
 ## Overview
 ![](./assets/images/visualization.png)
 
