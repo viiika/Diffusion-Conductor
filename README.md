@@ -1,6 +1,6 @@
 # Taming Diffusion Models for Music-driven Conducting Motion Generation
 
-Accepted by AAAI 2023 Summer Symposium, with Best Paper Award.
+Accepted by AAAI 2023 Summer Symposium, with **Best Paper Award**.
 
 ## Overview
 ![](./assets/images/visualization.png)
@@ -133,12 +133,13 @@ We would like to thank to the great projects in [VirtualConductor](https://githu
 1. Zhuoran Zhao and Jinbin Bai* and Delong Chen and Debang Wang and Yubo Pan. [Taming Diffusion Models for Music-driven Conducting Motion Generation](https://arxiv.org/abs/2306.10065)
 
     ```bibtex
-    @misc{zhao2023taming,
-      title={Taming Diffusion Models for Music-driven Conducting Motion Generation}, 
-      author={Zhuoran Zhao and Jinbin Bai and Delong Chen and Debang Wang and Yubo Pan},
-      year={2023},
-      eprint={2306.10065},
-      archivePrefix={arXiv},
-      primaryClass={eess.AS}
+    @inproceedings{zhao2023taming,
+      title={Taming diffusion models for music-driven conducting motion generation},
+      author={Zhao, Zhuoran and Bai, Jinbin and Chen, Delong and Wang, Debang and Pan, Yubo},
+      booktitle={Proceedings of the AAAI Symposium Series},
+      volume={1},
+      number={1},
+      pages={40--44},
+      year={2023}
     }
     ```
